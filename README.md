@@ -1,41 +1,43 @@
-# Command to generate KeyVault and the required account
+# Confluent Encryption with Azure Vault
+
+## Command to generate KeyVault and keys
 
 ```
 # Create the Resource Group
-$> az group create --location francecentral --resource-group UBS 
+$> az group create --location francecentral --resource-group PLAYPEN 
 
 $ Create a KeyVault
-$> az keyvault create --location francecentral --name ubsconfluente2etest --resource-group UBS --network-acls-ips 0.0.0.0/0 
+$> az keyvault create --location francecentral --name kk-vault --resource-group PLAYPEN --network-acls-ips 0.0.0.0/0 
 
 # Create a key in the vault
-$> az keyvault key create --name wrappingkey --vault-name ubsconfluente2etest
+$> az keyvault key create --name wrappingkey --vault-name kk-vault
 
 # For the application Kafka Producer, create a user to access the key only for encryption
-$> az ad sp create-for-rbac -n "E2EProducer" --skip-assignment
+$> az ad sp create-for-rbac -n "e2e-producer" --skip-assignment
 
 {
   "appId": "ff1d6f32-40fc-477a-91b2-3ddee8175da1",
   "displayName": "E2EProducer",
   "name": "ff1d6f32-40fc-477a-91b2-3ddee8175da1",
-  "password": "T5-3bWFaeSy~R22QT7kjv1pUuiHigNsdVl",
+  "password": "XXX",
   "tenant": "8bac639d-2c4e-43d6-9387-197ea85d40dd"
 }
 
 # Grant the required permission
-$> az keyvault set-policy --name ubsconfluente2etest --spn ff1d6f32-40fc-477a-91b2-3ddee8175da1 --key-permissions encrypt get
+$> az keyvault set-policy --name kk-vault --spn ff1d6f32-40fc-477a-91b2-3ddee8175da1 --key-permissions encrypt get
 
 # For the application Kafka Consumer, create a user to access the key only for decryption
-$> az ad sp create-for-rbac -n "E2EConsumer" --skip-assignment
+$> az ad sp create-for-rbac -n "e2e-consumer" --skip-assignment
 {
   "appId": "1cbebbc2-6a06-498a-8dc6-2efd3c2bc406",
   "displayName": "E2EConsumer",
   "name": "1cbebbc2-6a06-498a-8dc6-2efd3c2bc406",
-  "password": "2oA2R65YuM05xo4d3z.Qi03IAzU_hiZ05z",
+  "password": "XXX",
   "tenant": "8bac639d-2c4e-43d6-9387-197ea85d40dd"
 }
 
 # Grant the required permission
-$> az keyvault set-policy --name ubsconfluente2etest --spn 1cbebbc2-6a06-498a-8dc6-2efd3c2bc406 --key-permissions decrypt get
+$> az keyvault set-policy --name kk-vault --spn 1cbebbc2-6a06-498a-8dc6-2efd3c2bc406 --key-permissions decrypt get
 
 ```
 
@@ -45,7 +47,7 @@ $> az keyvault set-policy --name ubsconfluente2etest --spn 1cbebbc2-6a06-498a-8d
 # To rotate a key, the command is identical to key creation
 # The previous version would still be available until it's deleted
 # It can be deleted manually, or through an expiration date
-$> az keyvault key create --name wrappingkey --vault-name ubsconfluente2etest 
+$> az keyvault key create --name wrappingkey --vault-name kk-vault 
 ```
 
 # How to execute
