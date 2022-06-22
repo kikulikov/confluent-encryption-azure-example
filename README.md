@@ -1,6 +1,6 @@
 # Confluent Encryption with Azure Vault
 
-## Command to generate KeyVault and keys
+## Generate the KeyVault and keys
 
 ```
 # Create the Resource Group
@@ -41,7 +41,7 @@ $> az keyvault set-policy --name kk-vault --spn 1cbebbc2-6a06-498a-8dc6-2efd3c2b
 
 ```
 
-# Command to rotate a key
+## Rotate the keys
 
 ```
 # To rotate a key, the command is identical to key creation
@@ -50,20 +50,42 @@ $> az keyvault set-policy --name kk-vault --spn 1cbebbc2-6a06-498a-8dc6-2efd3c2b
 $> az keyvault key create --name wrappingkey --vault-name kk-vault 
 ```
 
-# How to execute
-
-```
-mvn package
-java -jar target/confluent-encryption-ubs-1.0-SNAPSHOT-shaded.jar
-```
-
-# Main classes available
+## Available Main classes
 
 * `io.confluent.Producer` - Produces one message in the `e2e` topic
 * `io.confluent.Consumer` - Consumes one batch of messages from the `e2e` topic
 * `io.confluent.Main` - Execute Producer than the Consumer
 
-# Kafka Connect
+## Importing the required libraries 
+
+```bash
+mvn install:install-file -Dfile=confluent-encryption-common-6.0.x-1.0.14.jar -DgroupId=io.confluent.confluent-encryption -DartifactId=confluent-encryption-common -Dversion=6.0.x-1.0.14 -Dpackaging=jar
+mvn install:install-file -Dfile=confluent-encryption-kafka-6.0.x-1.0.14.jar -DgroupId=io.confluent.confluent-encryption -DartifactId=confluent-encryption-kafka -Dversion=6.0.x-1.0.14 -Dpackaging=jar
+mvn install:install-file -Dfile=confluent-encryption-serializer-6.0.x-1.0.14.jar -DgroupId=io.confluent.confluent-encryption -DartifactId=confluent-encryption-serializer -Dversion=6.0.x-1.0.14 -Dpackaging=jar
+mvn install:install-file -Dfile=confluent-encryption-azure-6.0.x-1.0.14.jar -DgroupId=io.confluent.confluent-encryption -DartifactId=confluent-encryption-azure -Dversion=6.0.x-1.0.14 -Dpackaging=jar
+```
+
+## Building the application
+
+```shell
+mvn clean package # builds and run the tests
+mvn clean package -DskipTests # builds but ignores the tests
+```
+
+## Running the application
+
+```
+# Producer only
+java -cp target/confluent-encryption-ubs-1.0-SNAPSHOT-jar-with-dependencies.jar io.confluent.Producer src/main/resources/producer.properties
+
+# Consumer only
+java -cp target/confluent-encryption-ubs-1.0-SNAPSHOT-jar-with-dependencies.jar io.confluent.Consumer src/main/resources/consumer.properties
+
+# Producer and then Consumer
+java -cp target/confluent-encryption-ubs-1.0-SNAPSHOT-jar-with-dependencies.jar io.confluent.Main src/main/resources/producer.properties src/main/resources/consumer.properties
+```
+
+## Kafka Connect
 
 ```shell
 confluent-hub install confluentinc/kafka-connect-s3:10.0.8
